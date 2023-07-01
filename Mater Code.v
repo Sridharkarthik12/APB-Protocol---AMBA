@@ -1,20 +1,20 @@
 module Apb (
-  input  			pclk,
-  input  			preset_n, 	// Active low reset
+  input  			      pclk,
+  input  			      preset_n, 	// Active low reset
  
-  input	[1:0]		add_i,		// 2'b00 - NOP, 2'b01 - READ, 2'b11 - WRITE
+  input	[1:0]		    add_i,		// 2'b00 - NOP, 2'b01 - READ, 2'b11 - WRITE
   
-  output 			sel,      // to select the slave.here since only on slave,only one bit
-  output  			enable,  
+  output 			      sel,      // to select the slave.here since only on slave,only one bit
+  output  			    enable,  
   input             ready_i,
-  output  [31:0]	addr,
-  output 		    write_o,
+  output  [31:0]	  addr,
+  output 		        write_o,
   input [31:0]      rdata_i,// 1=WRITE , 0=READ
-  output  [31:0] 	wdata_o);
+  output  [31:0] 	  wdata_o);
   
- reg [1:0] current_state;
+  reg [1:0]         current_state;
  parameter ST_IDLE=2'b00, ST_SETUP=2'b01, ST_ACCESS=2'b10;
- reg [1:0] nxt_state;
+  reg [1:0]         nxt_state;
   
 
   
@@ -25,34 +25,34 @@ module Apb (
   reg [31:0] rdata_q;
   
   always @(posedge pclk or negedge preset_n)
-    if (~preset_n)
+  if (~preset_n)
       current_state <= ST_IDLE;
-  	else
+  else
       current_state <= nxt_state;
   
   always @(posedge pclk) 
   begin
     nxt_write = write_q;
     nxt_rdata = rdata_q;
-    case (current_state)
-      ST_IDLE:
-        if (add_i[0]) begin
+  case (current_state)
+    ST_IDLE:
+      if (add_i[0]) begin
           nxt_state = ST_SETUP;
           nxt_write = add_i[1];
-        end else begin
+      end else begin
           nxt_state = ST_IDLE;
-        end
-      ST_SETUP: nxt_state = ST_ACCESS;
-      ST_ACCESS:
-        if (ready_i) begin
-          if (~write_q)
+      end
+    ST_SETUP: nxt_state = ST_ACCESS;
+    ST_ACCESS:
+      if (ready_i) begin
+        if (~write_q)
             nxt_rdata = rdata_i;
             nxt_state = ST_IDLE;
-        end else
+      end else
           nxt_state = ST_ACCESS;
-      default: nxt_state = ST_IDLE;
-    endcase
-  end
+    default: nxt_state = ST_IDLE;
+  endcase
+end
   
  
   
