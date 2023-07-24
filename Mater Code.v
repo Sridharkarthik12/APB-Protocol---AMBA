@@ -5,12 +5,13 @@ module Apb (
   input	[1:0]		    add_i,		// 2'b00 - NOP, 2'b01 - READ, 2'b11 - WRITE
   
   output 			      sel,      // to select the slave.here since only on slave,only one bit
-  output  			    enable,  
-  input             ready_i,
-  output  [31:0]	  addr,
-  output 		        write_o,
-  input [31:0]      rdata_i,// 1=WRITE , 0=READ
-  output  [31:0] 	  wdata_o);
+  output  			    enable,     
+  input             ready_i,    // slave ready 
+  output  [31:0]	  addr,      // address
+  output 		        write_o,  // 1=WRITE , 0=READ
+  input [31:0]      rdata_i,  // read data
+  output  [31:0] 	  wdata_o   //write data
+);
   
   reg [1:0]         current_state;
  parameter ST_IDLE=2'b00, ST_SETUP=2'b01, ST_ACCESS=2'b10;
@@ -18,8 +19,8 @@ module Apb (
   
 
   
-  reg  nxt_write;
-  reg  write_q;
+  reg  nxt_write;  //to capture add[0] at setup
+  reg  write_q;    // 1=write,0=read;finally we will assign this to write_o
   
   reg [31:0] nxt_rdata;
   reg [31:0] rdata_q;
